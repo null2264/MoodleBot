@@ -12,7 +12,6 @@ import urllib
 from .utils.paginator import ziPages
 from datetime import datetime
 from discord.ext import commands, menus
-from markdownify import markdownify as md
 
 
 class MoodleEventsPageSource(menus.ListPageSource):
