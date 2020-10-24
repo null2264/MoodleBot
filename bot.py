@@ -21,17 +21,14 @@ try:
 except FileExistsError:
     pass
 
-extensions = [
-    "cogs.error_handler",
-    "cogs.moodle",
-    "cogs.help"
-]
+extensions = ["cogs.error_handler", "cogs.moodle", "cogs.help"]
 
 start_time = time.time()
 
+
 def get_prefix(bot, message):
     """A callable Prefix for our bot. This could be edited to allow per server prefixes."""
-    return commands.when_mentioned_or('!')(bot, message)
+    return commands.when_mentioned_or("!")(bot, message)
 
 
 class ziBot(commands.Bot):
@@ -42,23 +39,25 @@ class ziBot(commands.Bot):
             allowed_mentions=discord.AllowedMentions(users=True, roles=False),
             intents=discord.Intents.all(),
         )
-        
-        self.localedir = './locale'
-        self.translate = gettext.translation('elearningbot', self.localedir, fallback=True)
+
+        self.localedir = "./locale"
+        self.translate = gettext.translation(
+            "elearningbot", self.localedir, fallback=True
+        )
         self._ = self.translate.gettext
 
         self.logger = logging.getLogger("discord")
         self.session = aiohttp.ClientSession(loop=self.loop)
-        
+
         with open("config.json", "r") as f:
             self.config = json.load(f)
 
         if not self.config["bot_token"]:
             self.logger.error("No token found. Please add it to config.json!")
             raise AttributeError("No token found!")
-        
+
         self.master = [186713080841895936]
-    
+
     async def create_empty_table(self):
         await self.pool.execute(
             """CREATE TABLE IF NOT EXISTS elearningbot.token (user_id text, token text)"""
@@ -72,11 +71,9 @@ class ziBot(commands.Bot):
 
         for extension in extensions:
             self.load_extension(extension)
-        
+
         # Create elearningbot schema if not exist
-        await self.pool.execute(
-            """CREATE SCHEMA IF NOT EXISTS elearningbot"""
-        )
+        await self.pool.execute("""CREATE SCHEMA IF NOT EXISTS elearningbot""")
         await self.create_empty_table()
 
         self.logger.warning(f"Online: {self.user} (ID: {self.user.id})")

@@ -14,6 +14,7 @@ from datetime import datetime
 from discord.ext import commands, menus
 from markdownify import markdownify as md
 
+
 class MoodleEventsPageSource(menus.ListPageSource):
     def __init__(self, events):
         super().__init__(entries=events, per_page=1)
@@ -39,15 +40,34 @@ class MoodleEventsPageSource(menus.ListPageSource):
             pass
         content_unfilt = re.sub(regex[2], "**\\2**", content_unfilt)
         content = re.sub(regex[0], subst, content_unfilt)
-        
-        e = discord.Embed(title=str(event['name']).strip(" is due"), description=content, colour=discord.Colour.blue(), url=event['url'])
-        e.set_author(name=event['course']['fullname'], url=event['course']['viewurl'], icon_url="https://cdn.discordapp.com/avatars/769367431109541918/11102322dbeaf7b4d20bf49a9ef62ed0.webp")
 
-        e.add_field(name="Last Modified", value=datetime.fromtimestamp(event['timemodified']).strftime("%A, %-d %B %Y, %H:%M"))
-        e.add_field(name="Deadline", value=datetime.fromtimestamp(event['timesort']).strftime("%A, %-d %B %Y, %H:%M"))
+        e = discord.Embed(
+            title=str(event["name"]).strip(" is due"),
+            description=content,
+            colour=discord.Colour.blue(),
+            url=event["url"],
+        )
+        e.set_author(
+            name=event["course"]["fullname"],
+            url=event["course"]["viewurl"],
+            icon_url="https://cdn.discordapp.com/avatars/769367431109541918/11102322dbeaf7b4d20bf49a9ef62ed0.webp",
+        )
+
+        e.add_field(
+            name="Last Modified",
+            value=datetime.fromtimestamp(event["timemodified"]).strftime(
+                "%A, %-d %B %Y, %H:%M"
+            ),
+        )
+        e.add_field(
+            name="Deadline",
+            value=datetime.fromtimestamp(event["timesort"]).strftime(
+                "%A, %-d %B %Y, %H:%M"
+            ),
+        )
 
         maximum = self.get_max_pages()
-        e.set_footer(text=f'Page {menu.current_page + 1}/{maximum}')
+        e.set_footer(text=f"Page {menu.current_page + 1}/{maximum}")
         return e
 
 
@@ -174,7 +194,8 @@ class Moodle(commands.Cog, name="moodle"):
                 wait = await self.bot.wait_for("message", timeout=60.0, check=check)
             except asyncio.TimeoutError:
                 e = discord.Embed(
-                    description=self.bot._("Timed Out! Cancelled"), colour=discord.Colour.blue()
+                    description=self.bot._("Timed Out! Cancelled"),
+                    colour=discord.Colour.blue(),
                 )
                 await ctx.send(embed=e)
                 return
@@ -228,7 +249,7 @@ class Moodle(commands.Cog, name="moodle"):
             token, "core_calendar_get_calendar_upcoming_view"
         )
 
-        menu = ziPages(MoodleEventsPageSource(events['events']))
+        menu = ziPages(MoodleEventsPageSource(events["events"]))
         await menu.start(ctx)
 
 

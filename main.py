@@ -58,17 +58,17 @@ def check_json():
 def init_bot():
     loop = asyncio.get_event_loop()
     logger = logging.getLogger()
-    
+
     try:
         check_json()
     except FileNotFoundError:
         return
-    
+
     with open("config.json", "r") as f:
         config = json.load(f)
-    
+
     try:
-        pool = loop.run_until_complete(asyncpg.create_pool(config['postgresql']))
+        pool = loop.run_until_complete(asyncpg.create_pool(config["postgresql"]))
     except Exception as e:
         logger.error("Could not set up PostgreSQL. Exiting.")
         return
