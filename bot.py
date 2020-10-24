@@ -72,7 +72,10 @@ class ziBot(commands.Bot):
             self.load_extension(extension)
 
         # Create elearningbot schema if not exist
-        await self.pool.execute("""CREATE SCHEMA elearningbot""")
+        try:
+            await self.pool.execute("""CREATE SCHEMA elearningbot""")
+        except asyncpg.DuplicateSchemaError:
+            pass
         await self.create_empty_table()
 
         self.logger.warning(f"Online: {self.user} (ID: {self.user.id})")
