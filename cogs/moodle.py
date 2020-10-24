@@ -126,6 +126,10 @@ class Moodle(commands.Cog, name="moodle"):
         self.conn = self.bot.pool
         self.moodle = MoodleAPI(self.bot.config["moodle_baseurl"])
 
+    async def is_registered(self, ctx):
+        token = await self.fetch_token(ctx.author)
+        return token is not None
+
     async def fetch_token(self, member: discord.User):
         token = await self.conn.fetchrow(
             """
@@ -243,6 +247,9 @@ class Moodle(commands.Cog, name="moodle"):
 
     @get.command(aliases=["fucking_homework"])
     async def homework(self, ctx):
+        if not await self.is_registered(ctx):
+            return await ctx.send("You're not registered, please do `!register` first")
+
         user_id = await self.fetch_userid(ctx.author)
         token = await self.fetch_token(ctx.author)
         events = await self.moodle.get_func_json(

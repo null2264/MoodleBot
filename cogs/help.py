@@ -14,7 +14,7 @@ class CustomHelp(commands.HelpCommand):
 
     async def send_bot_help(self, mapping):
         destination = self.get_destination()
-        description = "To use <@!769367431109541918> you'll need to be registered first, use `!register` to start the registration.\nTo get upcoming event use `!calender`.\n\nFor further support please DM `ZiRO2264#4572`!"
+        description = "To use <@!769367431109541918> you'll need to be registered first, use `!register` to start the registration.\nTo get upcoming event use `!get homework`.\n\nFor further support please DM `ZiRO2264#4572`!"
         e = discord.Embed(
             title="Help with Elearning Bot", description=description, colour=self.COLOUR
         )
