@@ -13,7 +13,6 @@ import time
 
 from discord.errors import NotFound
 from discord.ext import commands
-from dotenv import load_dotenv
 
 # Create data directory if its not exist
 try:
