@@ -72,7 +72,7 @@ class ziBot(commands.Bot):
             self.load_extension(extension)
 
         # Create elearningbot schema if not exist
-        await self.pool.execute("""CREATE SCHEMA IF NOT EXISTS elearningbot""")
+        await self.pool.execute("""CREATE SCHEMA elearningbot""")
         await self.create_empty_table()
 
         self.logger.warning(f"Online: {self.user} (ID: {self.user.id})")
