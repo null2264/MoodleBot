@@ -25,7 +25,8 @@ def bar_make(value, gap, *, length=10, point=False, fill="█", empty="░"):
     return bar
 
 class MoodleCoursesPageSource(menus.ListPageSource):
-    def __init__(self, courses):
+    def __init__(self, ctx, courses):
+        self.ctx = ctx
         super().__init__(entries=courses, per_page=1)
 
     def format_page(self, menu, course):
@@ -46,12 +47,13 @@ class MoodleCoursesPageSource(menus.ListPageSource):
         e.add_field(name="Progress", value=f"{bar_make(round(course['progress']), 100, length=18)} {round(course['progress'])}%", inline=False)
         e.set_author(name=", ".join([x["fullname"] for x in course["lecturers"]]))
         maximum = self.get_max_pages()
-        e.set_footer(text=f"Page {menu.current_page + 1}/{maximum}")
+        e.set_footer(text=f"Requested by {self.ctx.author} - Page {menu.current_page + 1}/{maximum}", icon_url=self.ctx.author.avatar_url)
         return e
 
 
 class MoodleEventsPageSource(menus.ListPageSource):
-    def __init__(self, events):
+    def __init__(self, ctx, events):
+        self.ctx = ctx
         super().__init__(entries=events, per_page=1)
 
     def format_page(self, menu, event):
@@ -102,7 +104,7 @@ class MoodleEventsPageSource(menus.ListPageSource):
         )
 
         maximum = self.get_max_pages()
-        e.set_footer(text=f"Page {menu.current_page + 1}/{maximum}")
+        e.set_footer(text=f"Requested by {self.ctx.author} - Page {menu.current_page + 1}/{maximum}", icon_url=self.ctx.author.avatar_url)
         return e
 
 
@@ -388,7 +390,7 @@ class Moodle(commands.Cog, name="moodle"):
             token, "core_calendar_get_calendar_upcoming_view"
         )
 
-        menu = ziPages(MoodleEventsPageSource(events["events"]))
+        menu = ziPages(MoodleEventsPageSource(ctx, events["events"]))
         await menu.start(ctx)
 
     @get.command()
@@ -399,8 +401,7 @@ class Moodle(commands.Cog, name="moodle"):
         user_id = await self.fetch_userid(ctx.author)
         token = await self.fetch_token(ctx.author)
         courses = await self.moodle.get_enrolled_courses(user_id, token)
-
-        menu = ziPages(MoodleCoursesPageSource(courses))
+        menu = ziPages(MoodleCoursesPageSource(ctx, courses))
         await menu.start(ctx)
 
 
