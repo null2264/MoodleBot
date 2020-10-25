@@ -57,6 +57,10 @@ msgstr "Nama Pengguna?"
 msgid "Password?"
 msgstr "Kata Sandi?"
 
+#: cogs/moodle.py:203
+msgid "Timed Out! Cancelled"
+msgstr "Waktu Habis! Dibatalkan"
+
 #: cogs/moodle.py:214
 msgid "Registration Failed"
 msgstr "Pendaftaran Gagal"
