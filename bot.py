@@ -13,7 +13,6 @@ import time
 
 from discord.errors import NotFound
 from discord.ext import commands
-from dotenv import load_dotenv
 
 # Create data directory if its not exist
 try:
@@ -73,7 +72,10 @@ class ziBot(commands.Bot):
             self.load_extension(extension)
 
         # Create elearningbot schema if not exist
-        await self.pool.execute("""CREATE SCHEMA IF NOT EXISTS elearningbot""")
+        try:
+            await self.pool.execute("""CREATE SCHEMA elearningbot""")
+        except asyncpg.DuplicateSchemaError:
+            pass
         await self.create_empty_table()
 
         self.logger.warning(f"Online: {self.user} (ID: {self.user.id})")
