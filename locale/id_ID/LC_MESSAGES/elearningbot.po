@@ -33,28 +33,66 @@ msgstr "Untuk bantuan lebih lanjut silahkan DM `ZiRO2264#4572`!"
 msgid "Help with Elearning Bot"
 msgstr "Bantuan dengan Elearning Bot"
 
-#: cogs/moodle.py:53
+#: cogs/moodle.py:167
 msgid "You already have token registered!"
 msgstr "Token anda telah terdaftar!"
 
-#: cogs/moodle.py:58
+#: cogs/moodle.py:176
 msgid "Please check your DM to complete the registration!"
 msgstr "Silahkan cek pesan pribadi untuk menyelesaikan pendaftaran!"
 
-#: cogs/moodle.py:69 cogs/moodle.py:71
+#: cogs/moodle.py:185
+msgid "*This will not stored in the bot's database!"
+msgstr "*Password tidak akan tersimpan dalam database!"
+
+#: cogs/moodle.py:187
+msgid "*Usually registered as your student ID."
+msgstr "*Biasanya berupa NIM."
+
+#: cogs/moodle.py:191 cogs/moodle.py:197
 msgid "Username?"
 msgstr "Nama Pengguna?"
 
-#: cogs/moodle.py:69 cogs/moodle.py:71
+#: cogs/moodle.py:191 cogs/moodle.py:197
 msgid "Password?"
 msgstr "Kata Sandi?"
 
-#: cogs/moodle.py:82
+#: cogs/moodle.py:214
 msgid "Registration Failed"
 msgstr "Pendaftaran Gagal"
 
-#: cogs/moodle.py:82
+#: cogs/moodle.py:215
 msgid "Invalid login, please try again"
 msgstr "Login tidak valid, silahkan coba lagi"
 
+#: cogs/moodle.py:229
+msgid "Congratulation your token successfully registered!\n\n**Your account information**:\nUsername: `"
+msgstr "Selamat, token anda telah terdaftar!\n\n**Informasi akun anda**:\nNama pengguna: `"
 
+#: cogs/moodle.py:231
+msgid "`\nPassword: ||``"
+msgstr "`\nKata sandi: ||``"
+
+#: cogs/moodle.py:233
+msgid "``||\nToken: ||`"
+msgstr "``||\nToken: ||`"
+
+#: cogs/moodle.py:238
+msgid "User Information"
+msgstr "Informasi Pengguna"
+
+#: cogs/moodle.py:242
+msgid "Registration Success"
+msgstr "Pendaftaran Sukses"
+
+#: cogs/moodle.py:243
+msgid "Congratulation {0}, your token successfully registered!"
+msgstr "Selamat {0}, token anda telah terdaftar!"
+
+#: cogs/moodle.py:256
+msgid "{0}, your elearning user id is `{1}`"
+msgstr "{0}, nomor id pengguna anda adalah `{1}`"
+
+#: cogs/moodle.py:256
+msgid "You're not registered, please do `!register` first"
+msgstr "Anda belum terdaftar, silahkan gunakan `!register` terlebih dahulu"

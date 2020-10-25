@@ -14,6 +14,7 @@ from datetime import datetime
 from discord.ext import commands, menus
 from pytz import timezone
 
+
 class MoodleEventsPageSource(menus.ListPageSource):
     def __init__(self, events):
         super().__init__(entries=events, per_page=1)
@@ -54,15 +55,15 @@ class MoodleEventsPageSource(menus.ListPageSource):
 
         e.add_field(
             name="Last Modified",
-            value=datetime.fromtimestamp(event["timemodified"], timezone("Asia/Jakarta")).strftime(
-                "%A, %-d %B %Y, %H:%M"
-            ),
+            value=datetime.fromtimestamp(
+                event["timemodified"], timezone("Asia/Jakarta")
+            ).strftime("%A, %-d %B %Y, %H:%M"),
         )
         e.add_field(
             name="Deadline",
-            value=datetime.fromtimestamp(event["timesort"], timezone("Asia/Jakarta")).strftime(
-                "%A, %-d %B %Y, %H:%M"
-            ),
+            value=datetime.fromtimestamp(
+                event["timesort"], timezone("Asia/Jakarta")
+            ).strftime("%A, %-d %B %Y, %H:%M"),
         )
 
         maximum = self.get_max_pages()
@@ -121,6 +122,8 @@ class MoodleAPI(object):
 class Moodle(commands.Cog, name="moodle"):
     def __init__(self, bot):
         self.bot = bot
+        global t_
+        t_ = self.bot._
         self.logger = self.bot.logger
         self.conn = self.bot.pool
         self.moodle = MoodleAPI(self.bot.config["moodle_baseurl"])
@@ -179,9 +182,9 @@ class Moodle(commands.Cog, name="moodle"):
             try:
                 info = ""
                 if i == "password":
-                    info = "*This will not stored in the bot's database!"
+                    info = t_("*This will not stored in the bot's database!")
                 elif i == "username":
-                    info = "*Usually registered as your student ID."
+                    info = t_("*Usually registered as your student ID.")
 
                 if info:
                     e = discord.Embed(
@@ -222,14 +225,22 @@ class Moodle(commands.Cog, name="moodle"):
             str(ctx.author.id),
             token,
         )
-        desc = f"Congratulation your token successfully registered!\n\n**Your account information**:\nUsername: `{auth['username']}`\nPassword: ||``{auth['password']}``||\nToken: ||`{token}`||\n"
+        desc = (
+            t_("Congratulation your token successfully registered!\n\n**Your account information**:\nUsername: `")
+            + auth["username"]
+            + t_("`\nPassword: ||``")
+            + auth["password"]
+            + t_("``||\nToken: ||`")
+            + token
+            + "`||\n"
+        )
         e = discord.Embed(
-            title="User Information", description=desc, colour=discord.Colour.blue()
+            title=t_("User Information"), description=desc, colour=discord.Colour.blue()
         )
         await ctx.author.send(embed=e)
         e = discord.Embed(
-            title="Registration Success",
-            description=f"Congratulation {ctx.author.mention}, your token successfully registered!",
+            title=t_("Registration Success"),
+            description=t_("Congratulation {0}, your token successfully registered!").format(ctx.author.mention),
             colour=discord.Colour.blue(),
         )
         await ctx.send(embed=e)
@@ -242,12 +253,12 @@ class Moodle(commands.Cog, name="moodle"):
     @get.command(name="id")
     async def _id(self, ctx):
         user_id = await self.fetch_userid(ctx.author)
-        await ctx.send(f"{ctx.author.mention}, your elearning user id is `{user_id}`")
+        await ctx.send(t_("{0}, your elearning user id is `{1}`").format(ctx.author.mention, user_id))
 
     @get.command(aliases=["fucking_homework"])
     async def homework(self, ctx):
         if not await self.is_registered(ctx):
-            return await ctx.send("You're not registered, please do `!register` first")
+            return await ctx.send(t_("You're not registered, please do `!register` first"))
 
         user_id = await self.fetch_userid(ctx.author)
         token = await self.fetch_token(ctx.author)
