@@ -14,6 +14,41 @@ from datetime import datetime
 from discord.ext import commands, menus
 from pytz import timezone
 
+def bar_make(value, gap, *, length=10, point=False, fill="█", empty="░"):
+    bar = ""
+    scaled_value = (value / gap) * length
+    for i in range(1, (length + 1)):
+        check = (i == round(scaled_value)) if point else (i <= scaled_value)
+        bar += fill if check else empty
+    if point and (bar.count(fill) == 0):
+        bar = fill + bar[1:]
+    return bar
+
+class MoodleCoursesPageSource(menus.ListPageSource):
+    def __init__(self, courses):
+        super().__init__(entries=courses, per_page=1)
+
+    def format_page(self, menu, course):
+        weblink = f"https://elearning.binadarma.ac.id/course/view.php?id={course['id']}"
+        e = discord.Embed(title=course["displayname"], url=weblink, colour=discord.Colour.blue())
+        e.add_field(
+            name="Start",
+            value=datetime.fromtimestamp(
+                course["startdate"], timezone("Asia/Jakarta")
+            ).strftime("%A, %-d %B %Y, %H:%M"),
+        )
+        e.add_field(
+            name="End",
+            value=datetime.fromtimestamp(
+                course["enddate"], timezone("Asia/Jakarta")
+            ).strftime("%A, %-d %B %Y, %H:%M"),
+        )
+        e.add_field(name="Progress", value=f"{bar_make(round(course['progress']), 100, length=18)} {round(course['progress'])}%", inline=False)
+        e.set_author(name=", ".join([x["fullname"] for x in course["lecturers"]]))
+        maximum = self.get_max_pages()
+        e.set_footer(text=f"Page {menu.current_page + 1}/{maximum}")
+        return e
+
 
 class MoodleEventsPageSource(menus.ListPageSource):
     def __init__(self, events):
@@ -132,12 +167,28 @@ class MoodleAPI(object):
         except KeyError:
             return None
         return userid
-    
+
     async def get_raw_enrolled_courses(self, userid, token) -> list:
         """
         Get list of raw enrolled courses. Unfiltered
         """
-        courses = await self.get_func_json(token, f"core_enrol_get_users_courses&userid={userid}")
+        _courses = await self.get_func_json(
+            token, f"core_enrol_get_users_courses&userid={userid}"
+        )
+        courses = []
+        for course in _courses:
+            info = await self.get_course_info(course["id"], token)
+            courses.append(
+                {
+                    "id": info["id"],
+                    "displayname": info["displayname"],
+                    "startdate": info["startdate"],
+                    "enddate": info["enddate"],
+                    "progress": course["progress"],
+                    "lecturers": info["contacts"],
+                }
+            )
+
         return list(courses)
 
     async def get_enrolled_courses(self, userid, token) -> list:
@@ -149,9 +200,19 @@ class MoodleAPI(object):
         courses = []
         # filter courses that already ends
         for course in unfiltered:
-            if datetime.now().timestamp() < course['enddate']:
+            if datetime.now().timestamp() < course["enddate"]:
                 courses.append(course)
         return courses
+
+    async def get_course_info(self, courseid, token) -> dict:
+        """
+        Get course full information.
+        """
+        info = await self.get_func_json(
+            token, f"core_course_get_courses_by_field&field=id&value={courseid}"
+        )
+        return info["courses"][0]
+
 
 class Moodle(commands.Cog, name="moodle"):
     def __init__(self, bot):
@@ -161,6 +222,8 @@ class Moodle(commands.Cog, name="moodle"):
         self.logger = self.bot.logger
         self.conn = self.bot.pool
         self.moodle = MoodleAPI(self.bot.config["moodle_baseurl"])
+        global moodle
+        moodle = self.moodle
 
     async def is_registered(self, ctx) -> bool:
         """
@@ -269,7 +332,9 @@ class Moodle(commands.Cog, name="moodle"):
             token,
         )
         desc = (
-            t_("Congratulation your token successfully registered!\n\n**Your account information**:\nUsername: `")
+            t_(
+                "Congratulation your token successfully registered!\n\n**Your account information**:\nUsername: `"
+            )
             + auth["username"]
             + t_("`\nPassword: ||``")
             + auth["password"]
@@ -283,7 +348,9 @@ class Moodle(commands.Cog, name="moodle"):
         await ctx.author.send(embed=e)
         e = discord.Embed(
             title=t_("Registration Success"),
-            description=t_("Congratulation {0}, your token successfully registered!").format(ctx.author.mention),
+            description=t_(
+                "Congratulation {0}, your token successfully registered!"
+            ).format(ctx.author.mention),
             colour=discord.Colour.blue(),
         )
         await ctx.send(embed=e)
@@ -299,7 +366,11 @@ class Moodle(commands.Cog, name="moodle"):
         Get userid from Moodle.
         """
         user_id = await self.fetch_userid(ctx.author)
-        await ctx.send(t_("{0}, your elearning user id is `{1}`").format(ctx.author.mention, user_id))
+        await ctx.send(
+            t_("{0}, your elearning user id is `{1}`").format(
+                ctx.author.mention, user_id
+            )
+        )
 
     @get.command(aliases=["fucking_homework", "calendar"])
     async def homework(self, ctx):
@@ -307,7 +378,9 @@ class Moodle(commands.Cog, name="moodle"):
         Get upcoming events from Moodle.
         """
         if not await self.is_registered(ctx):
-            return await ctx.send(t_("You're not registered, please do `!register` first"))
+            return await ctx.send(
+                t_("You're not registered, please do `!register` first")
+            )
 
         user_id = await self.fetch_userid(ctx.author)
         token = await self.fetch_token(ctx.author)
@@ -316,6 +389,18 @@ class Moodle(commands.Cog, name="moodle"):
         )
 
         menu = ziPages(MoodleEventsPageSource(events["events"]))
+        await menu.start(ctx)
+
+    @get.command()
+    async def courses(self, ctx):
+        """
+        Get list of all available courses
+        """
+        user_id = await self.fetch_userid(ctx.author)
+        token = await self.fetch_token(ctx.author)
+        courses = await self.moodle.get_enrolled_courses(user_id, token)
+
+        menu = ziPages(MoodleCoursesPageSource(courses))
         await menu.start(ctx)
 
 
