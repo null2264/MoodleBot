@@ -12,7 +12,7 @@ import urllib
 from .utils.paginator import ziPages
 from datetime import datetime
 from discord.ext import commands, menus
-
+from pytz import timezone
 
 class MoodleEventsPageSource(menus.ListPageSource):
     def __init__(self, events):
@@ -54,13 +54,13 @@ class MoodleEventsPageSource(menus.ListPageSource):
 
         e.add_field(
             name="Last Modified",
-            value=datetime.fromtimestamp(event["timemodified"]).strftime(
+            value=datetime.fromtimestamp(event["timemodified"], timezone("Asia/Jakarta")).strftime(
                 "%A, %-d %B %Y, %H:%M"
             ),
         )
         e.add_field(
             name="Deadline",
-            value=datetime.fromtimestamp(event["timesort"]).strftime(
+            value=datetime.fromtimestamp(event["timesort"], timezone("Asia/Jakarta")).strftime(
                 "%A, %-d %B %Y, %H:%M"
             ),
         )
