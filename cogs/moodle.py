@@ -77,6 +77,11 @@ class MoodleAPI(object):
         self.base_url = base_url
 
     async def get_token(self, username: str, password: str):
+        """
+        Login to Moodle.
+
+        Required by most Moodle webservice function.
+        """
         username = "username=" + username
         password = "password=" + urllib.parse.quote(password)
         res = None
@@ -95,6 +100,11 @@ class MoodleAPI(object):
             return None
 
     async def get_func_json(self, token: str, function: str):
+        """
+        Request function.
+
+        Get data with specific Moodle webservice function.
+        """
         async with self.session.post(
             self.base_url
             + "webservice/rest/server.php?moodlewsrestformat=json&wstoken="
@@ -110,14 +120,38 @@ class MoodleAPI(object):
         except KeyError:
             return None
 
-    async def get_userid(self, token: str):
+    async def get_userid(self, token: str) -> str:
+        """
+        Get userid from token.
+
+        Useful for some functions that require `userid=` parameter
+        """
         userid = await self.get_func_json(token, "core_webservice_get_site_info")
         try:
             userid = userid["userid"]
         except KeyError:
             return None
         return userid
+    
+    async def get_raw_enrolled_courses(self, userid, token) -> list:
+        """
+        Get list of raw enrolled courses. Unfiltered
+        """
+        courses = await self.get_func_json(token, f"core_enrol_get_users_courses&userid={userid}")
+        return list(courses)
 
+    async def get_enrolled_courses(self, userid, token) -> list:
+        """
+        Get list of enrolled courses. Filtered, only show courses that still on-going
+        """
+        unfiltered = await self.get_raw_enrolled_courses(userid, token)
+        # _json = await self.get_func_json(token, f"core_enrol_get_users_courses&userid={userid}")
+        courses = []
+        # filter courses that already ends
+        for course in unfiltered:
+            if datetime.now().timestamp() < course['enddate']:
+                courses.append(course)
+        return courses
 
 class Moodle(commands.Cog, name="moodle"):
     def __init__(self, bot):
@@ -128,11 +162,17 @@ class Moodle(commands.Cog, name="moodle"):
         self.conn = self.bot.pool
         self.moodle = MoodleAPI(self.bot.config["moodle_baseurl"])
 
-    async def is_registered(self, ctx):
+    async def is_registered(self, ctx) -> bool:
+        """
+        Check if user's token registered.
+        """
         token = await self.fetch_token(ctx.author)
         return token is not None
 
-    async def fetch_token(self, member: discord.User):
+    async def fetch_token(self, member: discord.User) -> str:
+        """
+        Get token from database
+        """
         token = await self.conn.fetchrow(
             """
             SELECT * FROM elearningbot.token 
@@ -145,6 +185,9 @@ class Moodle(commands.Cog, name="moodle"):
         return token[1]
 
     async def fetch_userid(self, member: discord.User):
+        """
+        Get user's Moodle userid
+        """
         token = await self.fetch_token(member)
         return await self.moodle.get_userid(token)
 
@@ -247,16 +290,22 @@ class Moodle(commands.Cog, name="moodle"):
 
     @commands.group()
     async def get(self, ctx):
-        """Get information from elearning."""
+        """Get information from Moodle."""
         pass
 
     @get.command(name="id")
     async def _id(self, ctx):
+        """
+        Get userid from Moodle.
+        """
         user_id = await self.fetch_userid(ctx.author)
         await ctx.send(t_("{0}, your elearning user id is `{1}`").format(ctx.author.mention, user_id))
 
-    @get.command(aliases=["fucking_homework"])
+    @get.command(aliases=["fucking_homework", "calendar"])
     async def homework(self, ctx):
+        """
+        Get upcoming events from Moodle.
+        """
         if not await self.is_registered(ctx):
             return await ctx.send(t_("You're not registered, please do `!register` first"))
 
