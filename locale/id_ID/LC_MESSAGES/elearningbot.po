@@ -17,6 +17,22 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+#: cogs/help.py:20
+msgid "To use {0} you'll need to be registered first, use `!register` to start the registration.\n"
+msgstr "Untuk menggunakan {0} anda harus terdaftar terlebih dahulu, gunakan `!register` untuk memulai pendaftaran.\n"
+
+#: cogs/help.py:21
+msgid "To get upcoming event use `!get homework`.\n\n"
+msgstr "Untuk melihat kegiatan yang akan datang gunakan `!get homework`\n\n"
+
+#: cogs/help.py:22
+msgid "For further support please DM `ZiRO2264#4572`!"
+msgstr "Untuk bantuan lebih lanjut silahkan DM `ZiRO2264#4572`!"
+
+#: cogs/help.py:26
+msgid "Help with Elearning Bot"
+msgstr "Bantuan dengan Elearning Bot"
+
 #: cogs/moodle.py:53
 msgid "You already have token registered!"
 msgstr "Token anda telah terdaftar!"
@@ -40,3 +56,5 @@ msgstr "Pendaftaran Gagal"
 #: cogs/moodle.py:82
 msgid "Invalid login, please try again"
 msgstr "Login tidak valid, silahkan coba lagi"
+
+
