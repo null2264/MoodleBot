@@ -271,7 +271,6 @@ class Moodle(commands.Cog, name="moodle"):
         return await self.moodle.get_userid(token)
 
     @commands.command()
-    @commands.guild_only()
     async def register(self, ctx):
         """Register your elearning account to Elearning Bot."""
 
@@ -293,13 +292,14 @@ class Moodle(commands.Cog, name="moodle"):
 
         auth = {"username": "", "password": ""}
 
-        e = discord.Embed(
-            description=self.bot._(
-                "Please check your DM to complete the registration!"
-            ),
-            colour=discord.Colour.blue(),
-        )
-        await ctx.send(embed=e)
+        if str(ctx.channel.type) == "text":
+            e = discord.Embed(
+                description=self.bot._(
+                    "Please check your DM to complete the registration!"
+                ),
+                colour=discord.Colour.blue(),
+            )
+            await ctx.send(embed=e)
         for i in list(auth.keys()):
             try:
                 info = ""
@@ -362,19 +362,20 @@ class Moodle(commands.Cog, name="moodle"):
             title=t_("User Information"), description=desc, colour=discord.Colour.blue()
         )
         await ctx.author.send(embed=e)
-        e = discord.Embed(
-            title=t_("Registration Success"),
-            description=t_(
-                "Congratulation {0}, your token successfully registered!"
-            ).format(ctx.author.mention),
-            colour=discord.Colour.blue(),
-        )
-        await ctx.send(embed=e)
+        if ctx.channel.type == "text":
+            e = discord.Embed(
+                title=t_("Registration Success"),
+                description=t_(
+                    "Congratulation {0}, your token successfully registered!"
+                ).format(ctx.author.mention),
+                colour=discord.Colour.blue(),
+            )
+            await ctx.send(embed=e)
 
     @commands.group(invoke_without_command=True, usage="(keyword/option)")
     async def get(self, ctx, *, keyword):
         """Get an information from Moodle, or search for something using Searx."""
-        await ctx.invoke(self.bot.get_command('search'), keyword=keyword)
+        await ctx.invoke(self.bot.get_command("search"), keyword=keyword)
 
     @get.command(name="id")
     async def _id(self, ctx):
