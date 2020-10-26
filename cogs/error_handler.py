@@ -34,6 +34,14 @@ class ErrorHandler(commands.Cog):
         if isinstance(error, commands.CommandInvokeError):
             self.bot.logger.error(f"Something went wrong! error: {error}")
             
+            # Give details about the error
+            print(
+                "Ignoring exception in command {}:".format(ctx.command), file=sys.stderr
+            )
+            traceback.print_exception(
+                type(error), error, error.__traceback__, file=sys.stderr
+            )
+            
             # Send embed that when user react withh greenTick bot will send it to bot owner
             desc = (
                 f"The command was unsuccessful because of this reason:\n```{error}```\n"
@@ -67,7 +75,7 @@ class ErrorHandler(commands.Cog):
                 await msg.edit(embed=e)
                 await msg.clear_reactions()
             else:
-                bot_owner = self.bot.get_user(self.bot.owner_id)
+                bot_owner = self.bot.get_user(self.bot.master[0])
                 await bot_owner.send(
                     f"An error occured: `{error}`\nctx.message: `{ctx.message}`\nctx.message.content: `{ctx.message.content}`"
                 )
@@ -77,13 +85,6 @@ class ErrorHandler(commands.Cog):
                 await msg.edit(embed=e)
                 await msg.clear_reactions()
             
-            # Give details about the error
-            print(
-                "Ignoring exception in command {}:".format(ctx.command), file=sys.stderr
-            )
-            traceback.print_exception(
-                type(error), error, error.__traceback__, file=sys.stderr
-            )
             return
 
 
