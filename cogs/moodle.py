@@ -371,7 +371,7 @@ class Moodle(commands.Cog, name="moodle"):
         )
         await ctx.send(embed=e)
 
-    @commands.group(invoke_without_command=True)
+    @commands.group(invoke_without_command=True, usage="(keyword/option)")
     async def get(self, ctx, *, keyword):
         """Get an information from Moodle, or search for something using Searx."""
         await ctx.invoke(self.bot.get_command('search'), keyword=keyword)
