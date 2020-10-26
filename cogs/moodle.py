@@ -14,6 +14,7 @@ from datetime import datetime
 from discord.ext import commands, menus
 from pytz import timezone
 
+
 def bar_make(value, gap, *, length=10, point=False, fill="█", empty="░"):
     bar = ""
     scaled_value = (value / gap) * length
@@ -24,6 +25,7 @@ def bar_make(value, gap, *, length=10, point=False, fill="█", empty="░"):
         bar = fill + bar[1:]
     return bar
 
+
 class MoodleCoursesPageSource(menus.ListPageSource):
     def __init__(self, ctx, courses):
         self.ctx = ctx
@@ -31,7 +33,9 @@ class MoodleCoursesPageSource(menus.ListPageSource):
 
     def format_page(self, menu, course):
         weblink = f"https://elearning.binadarma.ac.id/course/view.php?id={course['id']}"
-        e = discord.Embed(title=course["displayname"], url=weblink, colour=discord.Colour.blue())
+        e = discord.Embed(
+            title=course["displayname"], url=weblink, colour=discord.Colour.blue()
+        )
         e.add_field(
             name="Start",
             value=datetime.fromtimestamp(
@@ -44,10 +48,17 @@ class MoodleCoursesPageSource(menus.ListPageSource):
                 course["enddate"], timezone("Asia/Jakarta")
             ).strftime("%A, %-d %B %Y, %H:%M"),
         )
-        e.add_field(name="Progress", value=f"{bar_make(round(course['progress']), 100, length=18)} {round(course['progress'])}%", inline=False)
+        e.add_field(
+            name="Progress",
+            value=f"{bar_make(round(course['progress']), 100, length=18)} {round(course['progress'])}%",
+            inline=False,
+        )
         e.set_author(name=", ".join([x["fullname"] for x in course["lecturers"]]))
         maximum = self.get_max_pages()
-        e.set_footer(text=f"Requested by {self.ctx.author} - Page {menu.current_page + 1}/{maximum}", icon_url=self.ctx.author.avatar_url)
+        e.set_footer(
+            text=f"Requested by {self.ctx.author} - Page {menu.current_page + 1}/{maximum}",
+            icon_url=self.ctx.author.avatar_url,
+        )
         return e
 
 
@@ -104,7 +115,10 @@ class MoodleEventsPageSource(menus.ListPageSource):
         )
 
         maximum = self.get_max_pages()
-        e.set_footer(text=f"Requested by {self.ctx.author} - Page {menu.current_page + 1}/{maximum}", icon_url=self.ctx.author.avatar_url)
+        e.set_footer(
+            text=f"Requested by {self.ctx.author} - Page {menu.current_page + 1}/{maximum}",
+            icon_url=self.ctx.author.avatar_url,
+        )
         return e
 
 
@@ -357,10 +371,10 @@ class Moodle(commands.Cog, name="moodle"):
         )
         await ctx.send(embed=e)
 
-    @commands.group()
-    async def get(self, ctx):
-        """Get information from Moodle."""
-        pass
+    @commands.group(invoke_without_command=True)
+    async def get(self, ctx, *, keyword):
+        """Get an information from Moodle, or search for something using Searx."""
+        await ctx.invoke(self.bot.get_command('search'), keyword=keyword)
 
     @get.command(name="id")
     async def _id(self, ctx):

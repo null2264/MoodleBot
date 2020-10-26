@@ -20,7 +20,7 @@ try:
 except FileExistsError:
     pass
 
-extensions = ["cogs.error_handler", "cogs.admin", "cogs.moodle", "cogs.help"]
+extensions = ["cogs.error_handler", "cogs.admin", "cogs.moodle", "cogs.general", "cogs.help"]
 
 start_time = time.time()
 
