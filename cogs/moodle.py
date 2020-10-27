@@ -405,8 +405,11 @@ class Moodle(commands.Cog, name="moodle"):
             token, "core_calendar_get_calendar_upcoming_view"
         )
 
-        menu = ziPages(MoodleEventsPageSource(ctx, events["events"]))
-        await menu.start(ctx)
+        try:
+            menu = ziPages(MoodleEventsPageSource(ctx, events["events"]))
+            await menu.start(ctx)
+        except KeyError:
+            await ctx.send("Bot failed to get the homeworks, it might be that the site is down.")
 
     @get.command()
     async def courses(self, ctx):
