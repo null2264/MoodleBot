@@ -1,3 +1,5 @@
+**DISCONTINUED**
+
 config.json example:
 
 ```json
